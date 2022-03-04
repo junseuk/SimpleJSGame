@@ -50,6 +50,8 @@ class Projectile {
     this.y = this.y + this.velocity.y;
   }
 }
+
+let enemySpeed = 0.5;
 class Enemy {
   constructor(x, y, radius, color, velocity) {
     this.x = x;
@@ -57,6 +59,7 @@ class Enemy {
     this.radius = radius;
     this.color = color;
     this.velocity = velocity;
+    this.speed = enemySpeed + (Math.random() * 0.4 - 0.2);
   }
 
   draw() {
@@ -69,8 +72,8 @@ class Enemy {
 
   update() {
     this.draw();
-    this.x = this.x + this.velocity.x;
-    this.y = this.y + this.velocity.y;
+    this.x = this.x + this.velocity.x * this.speed;
+    this.y = this.y + this.velocity.y * this.speed;
   }
 }
 
@@ -105,8 +108,13 @@ class Particle {
   }
 }
 
+let spawnInterval = 5000;
+let levelParam = 0.8;
+let minSpawnInterval = 1000;
 function spawnEnemy() {
-  setInterval(() => {
+  setTimeout(function spawning() {
+    console.log("inside interval ");
+    console.log("level: " + spawnInterval);
     //Max size = 30, Min size = 4
     const radius = Math.random() * (30 - 4) + 4;
     let x;
@@ -126,7 +134,8 @@ function spawnEnemy() {
       y: Math.sin(angle)
     }
     enemies.push(new Enemy(x, y, radius, color, velocity));
-  }, 1000)
+    setTimeout(spawning, spawnInterval);
+  }, spawnInterval)
 }
 
 let player = new  Player(x, y, 15, 'white');
@@ -134,12 +143,16 @@ let projectiles = [];
 let enemies = [];
 let particles = [];
 let _score = 0;
+let upgrade = false;
+let numOfKill = 0;
 
 function init() {
   player = new  Player(x, y, 15, 'white');
   projectiles = [];
   enemies = [];
   particles = [];
+  spawnInterval = 5000;
+  enemySpeed = 0.5;
   _score = 0;
   score.innerHTML = _score;
   score2.innerHTML = _score;
@@ -147,11 +160,26 @@ function init() {
 
 let animationId;
 function animate() {
-  animationId = requestAnimationFrame(animate);
+  console.log("inside animate");
+  if (numOfKill != 0 && numOfKill % 5 == 0) {
+    console.log("u killed:" + numOfKill);
+    numOfKill = 0;
+    console.log("u killed 2:", numOfKill);
+    upgrade = true;
+  }
+  if (upgrade) {
+    setTimeout(() => {
+      console.log("please choose");
+      upgrade = false;
+      animationId = requestAnimationFrame(animate);
+    },2000)
+  }
+  if (!upgrade) {
+    animationId = requestAnimationFrame(animate);
+  }
   c.fillStyle = 'rgba(0, 0, 0, 0.1)';
   c.fillRect(0, 0, canvas.width, canvas.height);
   player.draw();
-
   projectiles.forEach((projectile, index) => {
     projectile.update();
     //remove projectile if it goes off screen
@@ -192,7 +220,7 @@ function animate() {
         }
         if (enemy.radius - 10 > 10) {
           //increase score
-          _score += 100;
+          _score += 10;
           score.innerHTML = _score;
           gsap.to(enemy, {
             radius: enemy.radius - 10
@@ -203,8 +231,15 @@ function animate() {
         }
         else {
           //increase score with bonus
-          _score += 250;
+          _score += 25;
           score.innerHTML = _score;
+          numOfKill++;
+          console.log("kill: " + numOfKill);
+          //increase level
+          if (spawnInterval > minSpawnInterval) {
+            spawnInterval *= levelParam;
+            enemySpeed += 0.05;
+          }
           setTimeout(()=> {
             enemies.splice(index, 1);
             projectiles.splice(projectileIndex, 1);
