@@ -5,14 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Space Shots</title>
   <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+  <link href="./index.css" rel="stylesheet">
 </head>
 <body>
-  <style>
-    body {
-      background: black;
-      margin: 0;
-    }
-  </style>
   <div class="fixed text-white text-sm ml-2 mt-1 select-none">
     <span>Score </span>
     <span id="score">0</span>
@@ -30,13 +25,42 @@
 
   <div class="fixed inset-0 flex items-center justify-center" id="upgrade-modal" style="display: none;">
     <div class="bg-white max-w-md w-full p-6 text-center">
-      <h1 class="text-4xl font-bold leading-none" id="score2">0</h1>
-      <p class="text-sm text-gray-700 mb-4">Upgrades</p>
-      <div>
-        <button class="bg-blue-500 text-white w-full py-3 rounded-full text-sm" id="upgrade-btn">upgrade</button>
+      <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Click to upgrade</h2>
+      <p class="mt-2 mb-10 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">Upgrade Time!</p>
+
+      <div class="relative upgrade-box" id="upgrade-power">
+        <dt>
+          <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+            </svg>
+          </div>
+          <p class="text-lg m-1 h-12 font-medium flex items-center justify-center text-gray-900">Power Up</p>
+        </dt>
+      </div>
+      <div class="relative upgrade-box" id="upgrade-speed">
+        <dt>
+          <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+            </svg>
+          </div>
+          <p class="text-lg mt-6 h-12 hover:bg-violet-600 font-medium flex items-center justify-center text-gray-900">Speed Up</p>
+        </dt>
+      </div>
+      <div class="relative upgrade-box" id="upgrade-range">
+        <dt>
+          <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+            </svg>
+          </div>
+          <p class="text-lg mt-6 h-12 font-medium flex items-center justify-center text-gray-900">Range Up</p>
+        </dt>
       </div>
     </div>
   </div>
+
 
   <canvas></canvas>
 

@@ -1,20 +1,40 @@
+/*
+** html elements
+*/
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
-canvas.width = innerWidth
-canvas.height = innerHeight
-
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+const x = innerWidth / 2;
+const y = innerHeight / 2;
 const score = document.querySelector('#score');
 const score2 = document.querySelector('#score2');
 const startGameBtn = document.querySelector('#start-game-btn');
 const modal = document.querySelector('#modal');
 const upgradeModal = document.querySelector('#upgrade-modal');
-const upgradeBtn = document.querySelector("#upgrade-btn");
+const PowerUpgradeBtn = document.querySelector("#upgrade-power");
+const SpeedUpgradeBtn = document.querySelector("#upgrade-speed");
+const RangeUpgradeBtn = document.querySelector("#upgrade-range");
+
+/*
+** sound effects section
+*/
 const buttonAudio = new Audio('button.mp3');
 const upgradeAudio = new Audio('upgrade.mp3');
 const backgroundAudio = new Audio('background.mp3');
-buttonAudio.volume = 0.3;
-upgradeAudio.volume = 0.3;
-backgroundAudio.volume = 0.8;
+buttonAudio.volume = 0.2;
+upgradeAudio.volume = 0.4;
+backgroundAudio.volume = 0.6;
+
+/*
+** upgrade section
+*/
+let powerLvl = 0;
+let rangeLvl = 0;
+
+/*
+** Player
+*/
 class Player {
   constructor(x, y , radius, color) {
     this.x = x;
@@ -32,8 +52,9 @@ class Player {
   }
 }
 
-const x = innerWidth / 2;
-const y = innerHeight / 2;
+/*
+** Projectile
+*/
 class Projectile {
   constructor(x, y, radius, color, velocity) {
     this.x = x;
@@ -58,6 +79,9 @@ class Projectile {
   }
 }
 
+/*
+** Enemy
+*/
 let enemySpeed = 0.5;
 class Enemy {
   constructor(x, y, radius, color, velocity) {
@@ -84,6 +108,36 @@ class Enemy {
   }
 }
 
+function spawning() {
+  //Max size = 30, Min size = 4
+  const radius = Math.random() * (30 - 4) + 4;
+  let x;
+  let y;
+  if (Math.random() < 0.5) {
+    x = Math.random() < 0.5 ? 0 - radius : canvas.width + radius;
+    y = Math.random() * canvas.height;
+  }
+  else {
+    x = Math.random() * canvas.width;
+    y = Math.random() < 0.5 ? 0 - radius : canvas.height + radius;
+  }
+  const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
+  const angle = Math.atan2(canvas.height / 2 - y, canvas.width / 2 - x);
+  const velocity = {
+    x: Math.cos(angle),
+    y: Math.sin(angle)
+  }
+  enemies.push(new Enemy(x, y, radius, color, velocity));
+  setTimeout(spawning, spawnInterval);
+}
+
+function spawnEnemy() {
+  console.log("spawning enemy");
+  setTimeout(spawning, spawnInterval)
+}
+/*
+** Particle
+*/
 const friction = 0.97;
 class Particle {
   constructor(x, y, radius, color, velocity) {
@@ -115,35 +169,9 @@ class Particle {
   }
 }
 
-function spawning() {
-  console.log("hi")
-  //Max size = 30, Min size = 4
-  const radius = Math.random() * (30 - 4) + 4;
-  let x;
-  let y;
-  if (Math.random() < 0.5) {
-    x = Math.random() < 0.5 ? 0 - radius : canvas.width + radius;
-    y = Math.random() * canvas.height;
-  }
-  else {
-    x = Math.random() * canvas.width;
-    y = Math.random() < 0.5 ? 0 - radius : canvas.height + radius;
-  }
-  const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
-  const angle = Math.atan2(canvas.height / 2 - y, canvas.width / 2 - x);
-  const velocity = {
-    x: Math.cos(angle),
-    y: Math.sin(angle)
-  }
-  enemies.push(new Enemy(x, y, radius, color, velocity));
-  setTimeout(spawning, spawnInterval);
-}
-
-function spawnEnemy() {
-  console.log("spawning enemy");
-  setTimeout(spawning, spawnInterval)
-}
-
+/*
+** initialization
+*/
 let player = new  Player(x, y, 15, 'white');
 let projectiles = [];
 let enemies = [];
@@ -153,7 +181,7 @@ let upgrade = false;
 let upgradeCount = 0;
 let bossCount = 0;
 let spawnInterval = 5000;
-let minSpawnInterval = 1000;
+let minSpawnInterval = 800;
 const levelParam = 0.8;
 
 function init() {
@@ -171,6 +199,9 @@ function init() {
   score2.innerHTML = _score;
 }
 
+/*
+** animation loop
+*/
 let animationId;
 function animate() {
   if (upgradeCount != 0 && upgradeCount % 2 == 0) {
@@ -250,6 +281,7 @@ function animate() {
               enemySpeed += 0.05;
               console.log(enemySpeed);
             }
+            //next stage
             setTimeout(()=> {
               enemies.splice(index, 1);
               projectiles.splice(projectileIndex, 1);
@@ -269,6 +301,9 @@ function animate() {
   }
 };
 
+/*
+** event listeners
+*/
 addEventListener('click', (e) => {
   const angle = Math.atan2(e.clientY - canvas.height / 2, e.clientX - canvas.width / 2);
   const velocity = {
@@ -287,7 +322,24 @@ startGameBtn.addEventListener('click', () => {
   spawnEnemy();
 });
 
-upgradeBtn.addEventListener('click', () => {
+PowerUpgradeBtn.addEventListener('click', () => {
+  console.log("Power Upgrade");
+  upgradeAudio.play();
+  upgrade = false;
+  upgradeModal.style.display = 'none';
+  animate();
+});
+
+SpeedUpgradeBtn.addEventListener('click', () => {
+  console.log("Speed Upgrade");
+  upgradeAudio.play();
+  upgrade = false;
+  upgradeModal.style.display = 'none';
+  animate();
+});
+
+RangeUpgradeBtn.addEventListener('click', () => {
+  console.log("Range Upgrade");
   upgradeAudio.play();
   upgrade = false;
   upgradeModal.style.display = 'none';
