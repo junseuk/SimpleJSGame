@@ -14,7 +14,7 @@ const modal = document.querySelector('#modal');
 const upgradeModal = document.querySelector('#upgrade-modal');
 const PowerUpgradeBtn = document.querySelector("#upgrade-power");
 const SpeedUpgradeBtn = document.querySelector("#upgrade-speed");
-const RangeUpgradeBtn = document.querySelector("#upgrade-range");
+const NumProjectileUpgradeBtn = document.querySelector("#upgrade-num-projectile");
 
 /*
 ** sound effects section
@@ -31,7 +31,7 @@ backgroundAudio.volume = 0.6;
 */
 let powerLvl = 0;
 let speedLvl = 0.4;
-let rangeLvl = 0;
+let numProjectileLvl = 1;
 
 /*
 ** Player
@@ -84,19 +84,20 @@ class Boss {
 ** Projectile
 */
 class Projectile {
-  constructor(x, y, radius, color, velocity, speed) {
+  constructor(x, y, radius, velocity, speed, numProjectile, power) {
     this.x = x;
     this.y = y;
-    this.radius = radius;
-    this.color = color;
     this.velocity = velocity;
     this.speed = speed;
+    this.numProjectile = numProjectile;
+    this.power = power;
+    if (this.power + radius >= 20) this.radius = 20
+    else this.radius = radius + this.power;
   }
-
   draw() {
     c.beginPath();
     c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-    c.fillStyle = this.color;
+    c.fillStyle = `rgba(255, ${255 - this.power * 15}, ${255 - this.power * 15}, 1)`;
     c.fill();
     c.closePath();
   }
@@ -138,8 +139,10 @@ class Enemy {
 }
 
 function spawning() {
-  //Max size = 30, Min size = 4
-  const radius = Math.random() * (30 - 4) + 4;
+  console.log(animationId);
+  let maxSize = 30;
+  let minSize = 15;
+  const radius = Math.random() * (maxSize - minSize) + minSize;
   let x;
   let y;
   if (Math.random() < 0.5) {
@@ -229,7 +232,7 @@ function init() {
   score2.innerHTML = _score;
   powerLvl = 0;
   speedLvl = 0.4;
-  rangeLvl = 0;
+  numProjectileLvl = 1;
 }
 
 /*
@@ -343,7 +346,7 @@ addEventListener('click', (e) => {
     x: Math.cos(angle) * 5,
     y: Math.sin(angle) * 5
   }
-  projectiles.push(new Projectile(canvas.width / 2, canvas.height / 2, 5, 'white', velocity, speedLvl));
+  projectiles.push(new Projectile(canvas.width / 2, canvas.height / 2, 5, velocity, speedLvl, numProjectileLvl, powerLvl));
 })
 
 startGameBtn.addEventListener('click', () => {
@@ -375,11 +378,11 @@ SpeedUpgradeBtn.addEventListener('click', () => {
   animate();
 });
 
-RangeUpgradeBtn.addEventListener('click', () => {
+NumProjectileUpgradeBtn.addEventListener('click', () => {
   console.log("Range Upgrade");
   upgradeAudio.play();
   upgrade = false;
   upgradeModal.style.display = 'none';
-  console.log("Range: " + rangeLvl);
+  console.log("Range: " + numProjectileLvl);
   animate();
 });
