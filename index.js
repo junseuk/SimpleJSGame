@@ -30,6 +30,7 @@ backgroundAudio.volume = 0.6;
 ** upgrade section
 */
 let powerLvl = 0;
+let speedLvl = 0.4;
 let rangeLvl = 0;
 
 /*
@@ -53,17 +54,17 @@ class Player {
 }
 
 /*
-** Projectile
+** Boss
 */
-class Projectile {
+class Boss {
   constructor(x, y, radius, color, velocity) {
     this.x = x;
     this.y = y;
     this.radius = radius;
     this.color = color;
-    this.velocity = velocity;
+    this.velocity = velocity; 
   }
-
+  
   draw() {
     c.beginPath();
     c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
@@ -76,6 +77,34 @@ class Projectile {
     this.draw();
     this.x = this.x + this.velocity.x;
     this.y = this.y + this.velocity.y;
+  }
+}
+
+/*
+** Projectile
+*/
+class Projectile {
+  constructor(x, y, radius, color, velocity, speed) {
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.color = color;
+    this.velocity = velocity;
+    this.speed = speed;
+  }
+
+  draw() {
+    c.beginPath();
+    c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+    c.fillStyle = this.color;
+    c.fill();
+    c.closePath();
+  }
+
+  update() {
+    this.draw();
+    this.x = this.x + this.velocity.x * this.speed;
+    this.y = this.y + this.velocity.y * this.speed;
   }
 }
 
@@ -135,6 +164,7 @@ function spawnEnemy() {
   console.log("spawning enemy");
   setTimeout(spawning, spawnInterval)
 }
+
 /*
 ** Particle
 */
@@ -197,6 +227,9 @@ function init() {
   _score = 0;
   score.innerHTML = _score;
   score2.innerHTML = _score;
+  powerLvl = 0;
+  speedLvl = 0.4;
+  rangeLvl = 0;
 }
 
 /*
@@ -258,12 +291,12 @@ function animate() {
               }
             ));
           }
-          if (enemy.radius - 10 > 10) {
+          if (enemy.radius - (10 + powerLvl) > 10) {
             //increase score
             _score += 10;
             score.innerHTML = _score;
             gsap.to(enemy, {
-              radius: enemy.radius - 10
+              radius: enemy.radius - (10 + powerLvl)
             });
             setTimeout(() => {
               projectiles.splice(projectileIndex, 1);
@@ -310,7 +343,7 @@ addEventListener('click', (e) => {
     x: Math.cos(angle) * 5,
     y: Math.sin(angle) * 5
   }
-  projectiles.push(new Projectile(canvas.width / 2, canvas.height / 2, 5, 'white', velocity));
+  projectiles.push(new Projectile(canvas.width / 2, canvas.height / 2, 5, 'white', velocity, speedLvl));
 })
 
 startGameBtn.addEventListener('click', () => {
@@ -327,6 +360,8 @@ PowerUpgradeBtn.addEventListener('click', () => {
   upgradeAudio.play();
   upgrade = false;
   upgradeModal.style.display = 'none';
+  powerLvl += 5;
+  console.log("powerLvl: " + powerLvl);
   animate();
 });
 
@@ -335,6 +370,8 @@ SpeedUpgradeBtn.addEventListener('click', () => {
   upgradeAudio.play();
   upgrade = false;
   upgradeModal.style.display = 'none';
+  speedLvl += 0.3;
+  console.log("Speed: " + speedLvl);
   animate();
 });
 
@@ -343,5 +380,6 @@ RangeUpgradeBtn.addEventListener('click', () => {
   upgradeAudio.play();
   upgrade = false;
   upgradeModal.style.display = 'none';
+  console.log("Range: " + rangeLvl);
   animate();
 });
