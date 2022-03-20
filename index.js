@@ -27,11 +27,11 @@ upgradeAudio.volume = 0.4;
 backgroundAudio.volume = 0.6;
 
 /*
-** upgrade section
+** upgrade stats
 */
 let powerLvl = 0;
 let speedLvl = 0.4;
-let numProjectileLvl = 1;
+let numProjectileLvl = 500;
 
 /*
 ** Player
@@ -84,12 +84,11 @@ class Boss {
 ** Projectile
 */
 class Projectile {
-  constructor(x, y, radius, velocity, speed, numProjectile, power) {
+  constructor(x, y, radius, velocity, speed, power) {
     this.x = x;
     this.y = y;
     this.velocity = velocity;
     this.speed = speed;
-    this.numProjectile = numProjectile;
     this.power = power;
     if (this.power + radius >= 20) this.radius = 20
     else this.radius = radius + this.power;
@@ -108,6 +107,32 @@ class Projectile {
     this.y = this.y + this.velocity.y * this.speed;
   }
 }
+/*
+** shooting projectiles
+*/
+let shootingInterval;
+let mouseX;
+let mouseY;
+const shootingIntervalFunc = () => {
+  console.log("hi");
+  shootingInterval = setInterval(() => {
+    console.log("shoot!")
+    onmousemove = function (e) {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    };
+
+    const angle = Math.atan2(
+        mouseY - canvas.height / 2,
+        mouseX - canvas.width / 2
+    );
+    const velocity = {
+        x: Math.cos(angle) * 5,
+        y: Math.sin(angle) * 5,
+    };
+    projectiles.push(new Projectile(canvas.width / 2, canvas.height / 2, 5, velocity, speedLvl, powerLvl));
+  }, numProjectileLvl);
+};
 
 /*
 ** Enemy
@@ -133,23 +158,13 @@ class Enemy {
 
   update() {
     this.draw();
-    //angle
-    
     this.x = this.x + this.velocity.x;
     this.y = this.y + this.velocity.y;
 
-    if (up){
-        gsap.to(this, { y: this.y + this.velocity.y + playerVelocity, ease: "power3", duration: 0 });
-    }
-    if (right){
-        gsap.to(this, { x: this.x + this.velocity.x - playerVelocity, ease: "power3", duration: 0 });
-    }
-    if (down){
-        gsap.to(this, { y: this.y + this.velocity.y - playerVelocity, ease: "power3", duration: 0 });
-    }
-    if (left){
-        gsap.to(this, { x: this.x + this.velocity.x + playerVelocity, ease: "power3", duration: 0 });
-    }
+    if (up)    gsap.to(this, { y: this.y + this.velocity.y + playerVelocity, ease: "power3", duration: 0 });
+    if (right) gsap.to(this, { x: this.x + this.velocity.x - playerVelocity, ease: "power3", duration: 0 });
+    if (down)  gsap.to(this, { y: this.y + this.velocity.y - playerVelocity, ease: "power3", duration: 0 });
+    if (left)  gsap.to(this, { x: this.x + this.velocity.x + playerVelocity, ease: "power3", duration: 0 });
   }
 }
 
@@ -188,40 +203,24 @@ let down;
 let left;
 let right;
 function move(){
-    up = false;
-    down = false;
-    left = false;
-    right = false;
+  up = false;
+  down = false;
+  left = false;
+  right = false;
 
-    document.addEventListener('keydown',(e) => {
-        if (e.keyCode === 87 /* w */){
-            up = true
-        }
-        if (e.keyCode === 68 /* d */){
-            right = true
-        }
-        if (e.keyCode === 83 /* s */){
-            down = true
-        }
-        if (e.keyCode === 65 /* a */){
-            left = true
-        }
-    })
+  document.addEventListener('keydown',(e) => {
+    if (e.keyCode === 87 /* w */) up = true
+    if (e.keyCode === 68 /* d */) right = true
+    if (e.keyCode === 83 /* s */) down = true
+    if (e.keyCode === 65 /* a */) left = true
+  });
 
-    document.addEventListener('keyup',(e) => {
-        if (e.keyCode === 87 /* w */){
-            up = false
-        }
-        if (e.keyCode === 68 /* d */){
-            right = false
-        }
-        if (e.keyCode === 83 /* s */){
-            down = false
-        }
-        if (e.keyCode === 65 /* a */){
-            left = false
-        }
-    })
+  document.addEventListener('keyup',(e) => {
+    if (e.keyCode === 87 /* w */) up = false
+    if (e.keyCode === 68 /* d */) right = false
+    if (e.keyCode === 83 /* s */) down = false
+    if (e.keyCode === 65 /* a */) left = false
+  });
 }
 
 /*
@@ -272,7 +271,7 @@ let bossCount = 0;
 let spawnInterval = 5000;
 let minSpawnInterval = 800;
 let playerVelocity = 0.5;
-let projectileSpeed = 500;
+let upgradeInterval = 2;
 const levelParam = 0.8;
 
 function init() {
@@ -290,7 +289,7 @@ function init() {
   score2.innerHTML = _score;
   powerLvl = 0;
   speedLvl = 0.4;
-  numProjectileLvl = 1;
+  numProjectileLvl = 500;
   playerVelocity = 0.5;
 }
 
@@ -299,15 +298,17 @@ function init() {
 */
 let animationId;
 function animate() {
-  if (upgradeCount != 0 && upgradeCount % 2 == 0) {
+  if (upgradeCount != 0 && upgradeCount % upgradeInterval == 0) {
     console.log("upgrade init");
     upgradeCount = 0;
     bossCount++;
     upgrade = true;
   }
+  //Stop animation for upgrade phase
   if (upgrade) {
     console.log("upgrading");
     cancelAnimationFrame(animationId);
+    clearInterval(shootingInterval);
     upgradeModal.style.display = 'flex';
   }
   else {
@@ -395,24 +396,6 @@ function animate() {
     });
   }
 };
-let mouseX;
-let mouseY;
-setInterval(() => {
-    onmousemove = function (e) {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-    };
-
-    const angle = Math.atan2(
-        mouseY - canvas.height / 2,
-        mouseX - canvas.width / 2
-    );
-    const velocity = {
-        x: Math.cos(angle) * 5,
-        y: Math.sin(angle) * 5,
-    };
-    projectiles.push(new Projectile(canvas.width / 2, canvas.height / 2, 5, velocity, speedLvl, numProjectileLvl, powerLvl));
-}, projectileSpeed);
 
 /*
 ** event listeners
@@ -424,6 +407,7 @@ startGameBtn.addEventListener('click', () => {
   modal.style.display = 'none';
   animate();
   spawnEnemy();
+  shootingIntervalFunc();
   move();
 });
 
@@ -434,7 +418,9 @@ PowerUpgradeBtn.addEventListener('click', () => {
   upgradeModal.style.display = 'none';
   powerLvl += 5;
   console.log("powerLvl: " + powerLvl);
+  
   animate();
+  shootingIntervalFunc();
 });
 
 SpeedUpgradeBtn.addEventListener('click', () => {
@@ -445,6 +431,7 @@ SpeedUpgradeBtn.addEventListener('click', () => {
   speedLvl += 0.3;
   console.log("Speed: " + speedLvl);
   animate();
+  shootingIntervalFunc();
 });
 
 NumProjectileUpgradeBtn.addEventListener('click', () => {
@@ -452,6 +439,8 @@ NumProjectileUpgradeBtn.addEventListener('click', () => {
   upgradeAudio.play();
   upgrade = false;
   upgradeModal.style.display = 'none';
-  console.log("Range: " + numProjectileLvl);
+  numProjectileLvl -= 100;
+  console.log("numProjectile: " + numProjectileLvl);
   animate();
+  shootingIntervalFunc();
 });
