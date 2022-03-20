@@ -14,7 +14,7 @@ const modal = document.querySelector('#modal');
 const upgradeModal = document.querySelector('#upgrade-modal');
 const PowerUpgradeBtn = document.querySelector("#upgrade-power");
 const SpeedUpgradeBtn = document.querySelector("#upgrade-speed");
-const NumProjectileUpgradeBtn = document.querySelector("#upgrade-num-projectile");
+const FreqProjectileUpgradeBtn = document.querySelector("#upgrade-freq-projectile");
 
 /*
 ** sound effects section
@@ -31,7 +31,7 @@ backgroundAudio.volume = 0.6;
 */
 let powerLvl = 0;
 let speedLvl = 0.4;
-let numProjectileLvl = 500;
+let freqProjectileLvl = 1000;
 
 /*
 ** Player
@@ -114,24 +114,22 @@ let shootingInterval;
 let mouseX;
 let mouseY;
 const shootingIntervalFunc = () => {
-  console.log("hi");
   shootingInterval = setInterval(() => {
-    console.log("shoot!")
     onmousemove = function (e) {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
+      mouseX = e.clientX;
+      mouseY = e.clientY;
     };
-
+    console.log("shoot!")
     const angle = Math.atan2(
-        mouseY - canvas.height / 2,
-        mouseX - canvas.width / 2
+      mouseY - canvas.height / 2,
+      mouseX - canvas.width / 2
     );
     const velocity = {
-        x: Math.cos(angle) * 5,
-        y: Math.sin(angle) * 5,
+      x: Math.cos(angle) * 5,
+      y: Math.sin(angle) * 5,
     };
     projectiles.push(new Projectile(canvas.width / 2, canvas.height / 2, 5, velocity, speedLvl, powerLvl));
-  }, numProjectileLvl);
+  }, freqProjectileLvl);
 };
 
 /*
@@ -167,9 +165,9 @@ class Enemy {
     if (left)  gsap.to(this, { x: this.x + this.velocity.x + playerVelocity, ease: "power3", duration: 0 });
   }
 }
-
+let enemySpawnInterval;
 function spawning() {
-  console.log(animationId);
+  console.log(animationId, "spawningInterval", spawningInterval);
   let maxSize = 30;
   let minSize = 15;
   const radius = Math.random() * (maxSize - minSize) + minSize;
@@ -190,12 +188,7 @@ function spawning() {
     y: Math.sin(angle)
   }
   enemies.push(new Enemy(x, y, radius, color, velocity));
-  setTimeout(spawning, spawnInterval);
-}
-
-function spawnEnemy() {
-  console.log("spawning enemy");
-  setTimeout(spawning, spawnInterval)
+  enemySpawnInterval = setTimeout(spawning, spawningInterval);
 }
 
 let up;
@@ -268,8 +261,8 @@ let _score = 0;
 let upgrade = false;
 let upgradeCount = 0;
 let bossCount = 0;
-let spawnInterval = 5000;
-let minSpawnInterval = 800;
+let spawningInterval = 5000;
+let minSpawningInterval = 800;
 let playerVelocity = 0.5;
 let upgradeInterval = 2;
 const levelParam = 0.8;
@@ -279,7 +272,7 @@ function init() {
   projectiles = [];
   enemies = [];
   particles = [];
-  spawnInterval = 5000;
+  spawningInterval = 5000;
   enemySpeed = 0.5;
   bossCount = 0;
   upgradeCount = 0;
@@ -289,7 +282,7 @@ function init() {
   score2.innerHTML = _score;
   powerLvl = 0;
   speedLvl = 0.4;
-  numProjectileLvl = 500;
+  freqProjectileLvl = 1000;
   playerVelocity = 0.5;
 }
 
@@ -309,6 +302,7 @@ function animate() {
     console.log("upgrading");
     cancelAnimationFrame(animationId);
     clearInterval(shootingInterval);
+    clearTimeout(enemySpawnInterval);
     upgradeModal.style.display = 'flex';
   }
   else {
@@ -333,6 +327,7 @@ function animate() {
       enemy.update();
       const distance = Math.hypot(player.x - enemy.x, player.y - enemy.y);
       if (distance - enemy.radius - player.radius < 0) {
+        clearInterval(shootingInterval);
         cancelAnimationFrame(animationId);
         modal.style.display = 'flex';
         score2.innerHTML = _score;
@@ -372,8 +367,8 @@ function animate() {
             upgradeCount++;
             console.log("kill: " + upgradeCount);
             //increase level
-            if (spawnInterval > minSpawnInterval) {
-              spawnInterval *= levelParam;
+            if (spawningInterval > minSpawningInterval) {
+              spawningInterval *= levelParam;
               enemySpeed += 0.05;
               console.log(enemySpeed);
             }
@@ -401,29 +396,30 @@ function animate() {
 ** event listeners
 */
 startGameBtn.addEventListener('click', () => {
+  shootingIntervalFunc();
   backgroundAudio.play();
-  buttonAudio.play();
+  buttonAudio.play(); 
   init();
   modal.style.display = 'none';
   animate();
-  spawnEnemy();
-  shootingIntervalFunc();
+  spawning();
   move();
 });
 
 PowerUpgradeBtn.addEventListener('click', () => {
+  shootingIntervalFunc();
   console.log("Power Upgrade");
   upgradeAudio.play();
   upgrade = false;
   upgradeModal.style.display = 'none';
   powerLvl += 5;
   console.log("powerLvl: " + powerLvl);
-  
   animate();
-  shootingIntervalFunc();
+  spawning();
 });
 
 SpeedUpgradeBtn.addEventListener('click', () => {
+  shootingIntervalFunc();
   console.log("Speed Upgrade");
   upgradeAudio.play();
   upgrade = false;
@@ -431,16 +427,17 @@ SpeedUpgradeBtn.addEventListener('click', () => {
   speedLvl += 0.3;
   console.log("Speed: " + speedLvl);
   animate();
-  shootingIntervalFunc();
+  spawning();
 });
 
-NumProjectileUpgradeBtn.addEventListener('click', () => {
-  console.log("Range Upgrade");
+FreqProjectileUpgradeBtn.addEventListener('click', () => {
+  shootingIntervalFunc();
+  console.log("Freq Upgrade");
   upgradeAudio.play();
   upgrade = false;
   upgradeModal.style.display = 'none';
-  numProjectileLvl -= 100;
-  console.log("numProjectile: " + numProjectileLvl);
+  freqProjectileLvl -= 150;
+  console.log("numProjectile: " + freqProjectileLvl);
   animate();
-  shootingIntervalFunc();
+  spawning();
 });
