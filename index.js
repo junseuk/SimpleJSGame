@@ -137,12 +137,13 @@ const shootingIntervalFunc = () => {
 */
 let enemySpeed = 0.5;
 class Enemy {
-  constructor(x, y, radius, color, velocity) {
+  constructor(x, y, radius, color) {
     this.x = x;
     this.y = y;
     this.radius = radius;
     this.color = color;
-    this.velocity = velocity;
+    this.angle;
+    this.velocity;;
     this.speed = enemySpeed + (Math.random() * 0.4 - 0.2);
   }
 
@@ -156,15 +157,85 @@ class Enemy {
 
   update() {
     this.draw();
-    this.x = this.x + this.velocity.x;
-    this.y = this.y + this.velocity.y;
 
-    if (up)    gsap.to(this, { y: this.y + this.velocity.y + playerVelocity, ease: "power3", duration: 0 });
-    if (right) gsap.to(this, { x: this.x + this.velocity.x - playerVelocity, ease: "power3", duration: 0 });
-    if (down)  gsap.to(this, { y: this.y + this.velocity.y - playerVelocity, ease: "power3", duration: 0 });
-    if (left)  gsap.to(this, { x: this.x + this.velocity.x + playerVelocity, ease: "power3", duration: 0 });
+    // angle and velocity are constantly changing cuz the location of enemies is changing
+    this.angle = Math.atan2(canvas.height / 2 - this.y, canvas.width / 2 - this.x);
+    this.velocity = {x: Math.cos(this.angle), y: Math.sin(this.angle)};
+
+    // put a conditional statement to prevent enemies moving faster when key pressed
+    if(!up&&!down&&!left&&!right) {
+      this.x = this.x + this.velocity.x;
+      this.y = this.y + this.velocity.y;
+    }
+
+    // set the movement of enemies for 8 key presses 
+    if (up && right) {
+      gsap.to(this, {
+        x: this.x + this.velocity.x - playerVelocity,
+        y: this.y + this.velocity.y + playerVelocity,
+        ease: "power3",
+        duration: 0,
+      });
+    }
+    else if (up && left) {
+      gsap.to(this, {
+        x: this.x + this.velocity.x + playerVelocity,
+        y: this.y + this.velocity.y + playerVelocity,
+        ease: "power3",
+        duration: 0,
+      });
+    }
+    else if (down && right) {
+      gsap.to(this, {
+        x: this.x + this.velocity.x - playerVelocity,
+        y: this.y + this.velocity.y - playerVelocity,
+        ease: "power3",
+        duration: 0,
+      });
+    }
+    else if (down && left) {
+      gsap.to(this, {
+        x: this.x + this.velocity.x + playerVelocity,
+        y: this.y + this.velocity.y - playerVelocity,
+        ease: "power3",
+        duration: 0,
+      });
+    }
+    else if (up) {
+      gsap.to(this, {
+        y: this.y + this.velocity.y + playerVelocity,
+        x: this.x + this.velocity.x,
+        ease: "power3",
+        duration: 0,
+      });
+    }
+    else if (right) {
+      gsap.to(this, {
+        x: this.x + this.velocity.x - playerVelocity,
+        y: this.y + this.velocity.y,
+        ease: "power3",
+        duration: 0,
+      });
+    }
+    else if (down) {
+      gsap.to(this, {
+        y: this.y + this.velocity.y - playerVelocity,
+        x: this.x + this.velocity.x,
+        ease: "power3",
+        duration: 0,
+      });
+    }
+    else if (left) {
+      gsap.to(this, {
+        x: this.x + this.velocity.x + playerVelocity,
+        y: this.y + this.velocity.y,
+        ease: "power3",
+        duration: 0,
+      });
+    }
   }
 }
+
 let enemySpawnInterval;
 function spawning() {
   console.log(animationId, "spawningInterval", spawningInterval);
@@ -182,12 +253,8 @@ function spawning() {
     y = Math.random() < 0.5 ? 0 - radius : canvas.height + radius;
   }
   const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
-  const angle = Math.atan2(canvas.height / 2 - y, canvas.width / 2 - x);
-  const velocity = {
-    x: Math.cos(angle),
-    y: Math.sin(angle)
-  }
-  enemies.push(new Enemy(x, y, radius, color, velocity));
+
+  enemies.push(new Enemy(x, y, radius, color));
   enemySpawnInterval = setTimeout(spawning, spawningInterval);
 }
 
