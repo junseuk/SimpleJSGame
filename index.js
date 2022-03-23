@@ -143,7 +143,7 @@ class Enemy {
     this.radius = radius;
     this.color = color;
     this.angle;
-    this.velocity;;
+    this.velocity;
     this.speed = enemySpeed + (Math.random() * 0.4 - 0.2);
   }
 
@@ -331,7 +331,7 @@ let bossCount = 0;
 let spawningInterval = 5000;
 let minSpawningInterval = 800;
 let playerVelocity = 0.5;
-let upgradeInterval = 2;
+let upgradeInterval = 5;
 const levelParam = 0.8;
 
 function init() {
