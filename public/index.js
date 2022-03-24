@@ -1,4 +1,5 @@
-import { db, adding } from "./firebase.js";
+import { submitScore } from "./firebase.js";
+
 /*
 ** html elements
 */
@@ -10,8 +11,13 @@ const x = innerWidth / 2;
 const y = innerHeight / 2;
 const score = document.querySelector('#score');
 const score2 = document.querySelector('#score2');
+const username = document.getElementById('username');
+const comment = document.getElementById('comment');
 const startGameBtn = document.querySelector('#start-game-btn');
+const submitScoreBtn = document.querySelector('#submit-score-btn');
 const modal = document.querySelector('#modal');
+const initModal = document.querySelector('#init-modal');
+const resultModal = document.querySelector('#result-modal');
 const upgradeModal = document.querySelector('#upgrade-modal');
 const PowerUpgradeBtn = document.querySelector("#upgrade-power");
 const SpeedUpgradeBtn = document.querySelector("#upgrade-speed");
@@ -396,7 +402,8 @@ function animate() {
       if (distance - enemy.radius - player.radius < 0) {
         clearInterval(shootingInterval);
         cancelAnimationFrame(animationId);
-        modal.style.display = 'flex';
+        // modal.style.display = 'flex';
+        resultModal.style.display = 'flex';
         score2.innerHTML = _score;
       }
       projectiles.forEach((projectile, projectileIndex) => {
@@ -467,11 +474,18 @@ startGameBtn.addEventListener('click', () => {
   backgroundAudio.play();
   buttonAudio.play(); 
   init();
-  modal.style.display = 'none';
+  // modal.style.display = 'none';
+  initModal.style.display = 'none';
   animate();
   spawning();
   move();
 });
+
+submitScoreBtn.addEventListener('click', () => {
+  submitScore(username.value, score.innerHTML, comment.value);
+  resultModal.style.display = 'none';
+  initModal.style.display = 'flex';
+})
 
 PowerUpgradeBtn.addEventListener('click', () => {
   shootingIntervalFunc();
