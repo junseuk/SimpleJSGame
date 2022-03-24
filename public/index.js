@@ -1,4 +1,4 @@
-import { db, adding } from "./firebase.js";
+import { fetchRanking } from "./firebase.js";
 /*
 ** html elements
 */
@@ -10,12 +10,43 @@ const x = innerWidth / 2;
 const y = innerHeight / 2;
 const score = document.querySelector('#score');
 const score2 = document.querySelector('#score2');
-const startGameBtn = document.querySelector('#start-game-btn');
+const startGameBtns = document.querySelectorAll('#start-game-btn');
 const modal = document.querySelector('#modal');
 const upgradeModal = document.querySelector('#upgrade-modal');
 const PowerUpgradeBtn = document.querySelector("#upgrade-power");
 const SpeedUpgradeBtn = document.querySelector("#upgrade-speed");
 const FreqProjectileUpgradeBtn = document.querySelector("#upgrade-freq-projectile");
+const ranking_modal = document.querySelector('#ranking-modal');
+const first_name = document.querySelector("#first-name");
+const first_score = document.querySelector("#first-score");
+const first_comment = document.querySelector("#first-comment");
+const second_name = document.querySelector("#second-name");
+const second_score = document.querySelector("#second-score");
+const second_comment = document.querySelector("#second-comment");
+const third_name = document.querySelector("#third-name");
+const third_score = document.querySelector("#third-score");
+const third_comment = document.querySelector("#third-comment");
+
+/*
+** Ranking table
+*/
+let sortedData = [];
+let fetchedData = fetchRanking();
+fetchedData.then((data) => {
+  sortedData = data.sort((a, b) => {
+    return b.score - a.score;
+  });
+  first_name.innerHTML = sortedData[0].name;
+  first_score.innerHTML = sortedData[0].score;
+  first_comment.innerHTML = sortedData[0].comment;
+  second_name.innerHTML = sortedData[1].name;
+  second_score.innerHTML = sortedData[1].score;
+  second_comment.innerHTML = sortedData[1].comment;
+  third_name.innerHTML = sortedData[2].name;
+  third_score.innerHTML = sortedData[2].score;
+  third_comment.innerHTML = sortedData[2].comment;
+});
+
 /*
 ** sound effects section
 */
@@ -395,8 +426,9 @@ function animate() {
       const distance = Math.hypot(player.x - enemy.x, player.y - enemy.y);
       if (distance - enemy.radius - player.radius < 0) {
         clearInterval(shootingInterval);
+        clearTimeout(enemySpawnInterval);
         cancelAnimationFrame(animationId);
-        modal.style.display = 'flex';
+        ranking_modal.style.display = 'flex';
         score2.innerHTML = _score;
       }
       projectiles.forEach((projectile, projectileIndex) => {
@@ -462,16 +494,19 @@ function animate() {
 /*
 ** event listeners
 */
-startGameBtn.addEventListener('click', () => {
-  shootingIntervalFunc();
-  backgroundAudio.play();
-  buttonAudio.play(); 
-  init();
-  modal.style.display = 'none';
-  animate();
-  spawning();
-  move();
-});
+for (const startGameBtn of startGameBtns) {
+  startGameBtn.addEventListener('click', () => {
+    shootingIntervalFunc();
+    backgroundAudio.play();
+    buttonAudio.play(); 
+    init();
+    modal.style.display = 'none';
+    ranking_modal.style.display = 'none';
+    animate();
+    spawning();
+    move();
+  });
+}
 
 PowerUpgradeBtn.addEventListener('click', () => {
   shootingIntervalFunc();
