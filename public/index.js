@@ -1,4 +1,5 @@
 import { fetchRanking, submitScore } from "./firebase.js";
+
 /*
 ** html elements
 */
@@ -10,8 +11,13 @@ const x = innerWidth / 2;
 const y = innerHeight / 2;
 const score = document.querySelector('#score');
 const score2 = document.querySelector('#score2');
+const username = document.getElementById('username');
+const comment = document.getElementById('comment');
+const submitScoreBtn = document.querySelector('#submit-score-btn');
 const startGameBtns = document.querySelectorAll('#start-game-btn');
 const modal = document.querySelector('#modal');
+const initModal = document.querySelector('#init-modal');
+const resultModal = document.querySelector('#result-modal');
 const upgradeModal = document.querySelector('#upgrade-modal');
 const PowerUpgradeBtn = document.querySelector("#upgrade-power");
 const SpeedUpgradeBtn = document.querySelector("#upgrade-speed");
@@ -428,7 +434,8 @@ function animate() {
         clearInterval(shootingInterval);
         clearTimeout(enemySpawnInterval);
         cancelAnimationFrame(animationId);
-        ranking_modal.style.display = 'flex';
+        resultModal.style.display = 'flex';
+        //ranking_modal.style.display = 'flex';
         score2.innerHTML = _score;
       }
       projectiles.forEach((projectile, projectileIndex) => {
@@ -500,13 +507,18 @@ for (const startGameBtn of startGameBtns) {
     backgroundAudio.play();
     buttonAudio.play(); 
     init();
-    modal.style.display = 'none';
-    ranking_modal.style.display = 'none';
+    initModal.style.display = 'none';
     animate();
     spawning();
     move();
   });
 }
+
+submitScoreBtn.addEventListener('click', () => {
+  submitScore(username.value, score.innerHTML, comment.value);
+  resultModal.style.display = 'none';
+  initModal.style.display = 'flex';
+})
 
 PowerUpgradeBtn.addEventListener('click', () => {
   shootingIntervalFunc();
