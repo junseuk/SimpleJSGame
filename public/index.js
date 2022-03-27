@@ -1,4 +1,4 @@
-import { fetchRanking } from "./firebase.js";
+import { fetchRanking, submitScore } from "./firebase.js";
 /*
 ** html elements
 */
