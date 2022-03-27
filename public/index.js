@@ -15,8 +15,7 @@ const username = document.getElementById('username');
 const comment = document.getElementById('comment');
 const submitScoreBtn = document.querySelector('#submit-score-btn');
 const startGameBtns = document.querySelectorAll('#start-game-btn');
-const modal = document.querySelector('#modal');
-const initModal = document.querySelector('#init-modal');
+const init_modal = document.querySelector('#init-modal');
 const resultModal = document.querySelector('#result-modal');
 const upgradeModal = document.querySelector('#upgrade-modal');
 const PowerUpgradeBtn = document.querySelector("#upgrade-power");
@@ -32,26 +31,8 @@ const second_comment = document.querySelector("#second-comment");
 const third_name = document.querySelector("#third-name");
 const third_score = document.querySelector("#third-score");
 const third_comment = document.querySelector("#third-comment");
-
-/*
-** Ranking table
-*/
-let sortedData = [];
-let fetchedData = fetchRanking();
-fetchedData.then((data) => {
-  sortedData = data.sort((a, b) => {
-    return b.score - a.score;
-  });
-  first_name.innerHTML = sortedData[0].name;
-  first_score.innerHTML = sortedData[0].score;
-  first_comment.innerHTML = sortedData[0].comment;
-  second_name.innerHTML = sortedData[1].name;
-  second_score.innerHTML = sortedData[1].score;
-  second_comment.innerHTML = sortedData[1].comment;
-  third_name.innerHTML = sortedData[2].name;
-  third_score.innerHTML = sortedData[2].score;
-  third_comment.innerHTML = sortedData[2].comment;
-});
+const myRanking = document.querySelector("#my-ranking");
+let sortedRankingData = [];
 
 /*
 ** sound effects section
@@ -435,7 +416,6 @@ function animate() {
         clearTimeout(enemySpawnInterval);
         cancelAnimationFrame(animationId);
         resultModal.style.display = 'flex';
-        //ranking_modal.style.display = 'flex';
         score2.innerHTML = _score;
       }
       projectiles.forEach((projectile, projectileIndex) => {
@@ -507,18 +487,62 @@ for (const startGameBtn of startGameBtns) {
     backgroundAudio.play();
     buttonAudio.play(); 
     init();
-    initModal.style.display = 'none';
+    init_modal.style.display = 'none';
+    ranking_modal.style.display = 'none';
     animate();
     spawning();
     move();
+    /*
+    ** Ranking table
+    */
+    let fetchedData = fetchRanking();
+    fetchedData.then((data) => {
+      sortedRankingData = data.sort((a, b) => {
+        return b.score - a.score;
+      });
+    });
   });
 }
 
 submitScoreBtn.addEventListener('click', () => {
   submitScore(username.value, score.innerHTML, comment.value);
+  let myRankingNumber;
+  for(let i=0; i<sortedRankingData.length; i++) {
+    if (sortedRankingData[i].score <= _score) {
+      sortedRankingData.splice(i, 0, {
+        name: username.value,
+        score: _score,
+        comment: comment.value
+      });
+      myRankingNumber = i+1;
+      break;
+    }
+  }
+  first_name.innerHTML = sortedRankingData[0].name;
+  first_score.innerHTML = sortedRankingData[0].score;
+  first_comment.innerHTML = sortedRankingData[0].comment;
+  second_name.innerHTML = sortedRankingData[1].name;
+  second_score.innerHTML = sortedRankingData[1].score;
+  second_comment.innerHTML = sortedRankingData[1].comment;
+  third_name.innerHTML = sortedRankingData[2].name;
+  third_score.innerHTML = sortedRankingData[2].score;
+  third_comment.innerHTML = sortedRankingData[2].comment;
+  if (myRanking == 1) {
+    myRanking.innerHTML = `you took 1st place`;
+  }
+  else if (myRanking == 2) {
+    myRanking.innerHTML = `you took 2nd place`;
+  }
+  else if (myRanking == 3) {
+    myRanking.innerHTML = `you took 3rd place`;
+  }
+  else {
+    myRanking.innerHTML = `you took ${myRankingNumber}th place`;
+  }
   resultModal.style.display = 'none';
-  initModal.style.display = 'flex';
+  ranking_modal.style.display = 'flex';
 })
+
 
 PowerUpgradeBtn.addEventListener('click', () => {
   shootingIntervalFunc();
