@@ -527,13 +527,13 @@ submitScoreBtn.addEventListener('click', () => {
   third_name.innerHTML = sortedRankingData[2].name;
   third_score.innerHTML = sortedRankingData[2].score;
   third_comment.innerHTML = sortedRankingData[2].comment;
-  if (myRanking == "1") {
+  if (myRankingNumber == 1) {
     myRanking.innerHTML = `you took 1st place`;
   }
-  else if (myRanking == "2") {
+  else if (myRankingNumber == 2) {
     myRanking.innerHTML = `you took 2nd place`;
   }
-  else if (myRanking == "3") {
+  else if (myRankingNumber == 3) {
     myRanking.innerHTML = `you took 3rd place`;
   }
   else {
